@@ -13,7 +13,7 @@ export const GlobalStyles = createGlobalStyle`
   body {
     font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 1rem; font-weight: 400; line-height: 1.5;
-    color: #1e293b; background-color: #f8fafc; overflow-x: hidden;
+    color: #1e293b; background-color: #f8fafc; overflow-x: clip;
   }
 
   h1,h2,h3,h4,h5,h6 {

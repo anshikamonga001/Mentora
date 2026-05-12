@@ -1,7 +1,6 @@
-import React from 'react';
+﻿import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { useLocation } from 'react-router-dom';
 import { 
   Mail, 
   Phone, 
@@ -14,7 +13,6 @@ import {
   Heart,
   ArrowUp
 } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
 
 const FooterContainer = styled.footer`
   background: linear-gradient(135deg, 
@@ -177,8 +175,6 @@ const LogoText = styled.span`
 `;
 
 const Footer: React.FC = () => {
-  const { user } = useAuth();
-  
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -259,17 +255,8 @@ const Footer: React.FC = () => {
             <FooterSection variants={itemVariants}>
               <SectionTitle>Quick Links</SectionTitle>
               <FooterLink href="/dashboard">Dashboard</FooterLink>
-              {user?.role === 'tutor' ? (
-                <>
-                  <FooterLink href="/answer-zone">Answer Zone</FooterLink>
-                  <FooterLink href="/sessions">Host Sessions</FooterLink>
-                </>
-              ) : (
-                <>
-                  <FooterLink href="/ask-zone">Ask Zone</FooterLink>
-                  <FooterLink href="/mentors">Find Mentors</FooterLink>
-                </>
-              )}
+              <FooterLink href="/ask-zone">Ask Zone</FooterLink>
+              <FooterLink href="/mentors">Find Mentors</FooterLink>
               <FooterLink href="/freelance">Freelance Projects</FooterLink>
               <FooterLink href="/leaderboard">Leaderboard</FooterLink>
             </FooterSection>
@@ -303,7 +290,7 @@ const Footer: React.FC = () => {
 
         <FooterBottom>
           <Copyright>
-            © 2026 Mentora. Made with <Heart size={16} color="#ef4444" /> for learners everywhere.
+            ┬⌐ 2024 Mentora. Made with <Heart size={16} color="#ef4444" /> for learners everywhere.
           </Copyright>
           <BackToTop
             onClick={scrollToTop}

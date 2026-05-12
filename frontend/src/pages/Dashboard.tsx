@@ -19,10 +19,12 @@ const DashLayout = styled.div`
 
 const Sidebar = styled.div`
   width:240px;flex-shrink:0;background:#0f172a;
-  position:fixed;top:68px;left:0;bottom:0;
+  position:sticky;top:68px;
+  align-self: flex-start;
+  height:calc(100vh - 68px);
   display:flex;flex-direction:column;
   border-right:1px solid rgba(255,255,255,.06);
-  overflow-y:auto;z-index:100;
+  overflow:hidden;z-index:100;
   @media(max-width:1024px){display:none;}
 `;
 
@@ -41,9 +43,9 @@ const SideUserRole = styled.div`font-size:.7rem;color:#64748b;text-transform:cap
 const XPBar = styled.div`margin-top:.75rem;`;
 const XPLabel = styled.div`display:flex;justify-content:space-between;font-size:.7rem;color:#64748b;margin-bottom:.375rem;`;
 
-const SideNav = styled.nav`flex:1;padding:1rem 0.75rem;`;
+const SideNav = styled.nav`flex:1;padding:1rem 0.75rem 0;overflow-y:auto;`;
 
-const SideSection = styled.div`margin-bottom:1.5rem;`;
+const SideSection = styled.div`margin-bottom:0.5rem;`;
 const SideSectionTitle = styled.div`
   font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
   color:#334155;padding:.25rem .5rem;margin-bottom:.375rem;
@@ -60,7 +62,7 @@ const SideLink = styled(Link)<{$active?:boolean}>`
 `;
 
 const SideBottom = styled.div`
-  padding:1rem .75rem;border-top:1px solid rgba(255,255,255,.06);
+  padding:0.75rem;border-top:1px solid rgba(255,255,255,.06);
 `;
 
 const LevelBadge = styled.div`
@@ -79,8 +81,7 @@ const LevelSub = styled.div`font-size:.65rem;color:#64748b;`;
 
 /* ── Main ── */
 const Main = styled.main`
-  flex:1;margin-left:240px;padding:2rem;
-  @media(max-width:1024px){margin-left:0;}
+  flex:1;padding:2rem;
   @media(max-width:640px){padding:1.25rem;}
 `;
 
@@ -226,16 +227,33 @@ const Dashboard: React.FC = () => {
     {icon:Star,         text:'5-star rating received',       time:'1 day ago', color:'linear-gradient(135deg,#8b5cf6,#a855f7)'},
   ];
 
-  const sideLinks = [
-    {path:'/dashboard', label:'Dashboard',    icon:LayoutDashboard},
-    user?.role === 'tutor' 
-      ? {path:'/answer-zone', label:'Answer Zone', icon:BookOpen}
-      : {path:'/ask-zone',    label:'Ask Zone',    icon:MessageCircle},
-    {path:'/mentors',   label:'Mentors',       icon:Users},
-    {path:'/sessions',  label:'Sessions',      icon:Clock},
-    {path:'/freelance', label:'Freelance',     icon:Briefcase},
-    {path:'/profile',   label:'Profile',       icon:Activity},
-  ];
+  const getSideLinks = () => {
+    switch (user?.role) {
+      case 'tutor': return [
+        {path:'/dashboard',    label:'Dashboard',    icon:LayoutDashboard},
+        {path:'/answer-zone',  label:'Answer Zone',  icon:BookOpen},
+        {path:'/sessions',     label:'My Sessions',  icon:Clock},
+        {path:'/freelance',    label:'Freelance',    icon:Briefcase},
+        {path:'/profile',      label:'Profile',      icon:Activity},
+      ];
+      case 'freelancer': return [
+        {path:'/dashboard',    label:'Dashboard',    icon:LayoutDashboard},
+        {path:'/freelance',    label:'Projects',     icon:Briefcase},
+        {path:'/mentors',      label:'Find Mentors', icon:Users},
+        {path:'/profile',      label:'Portfolio',    icon:Activity},
+      ];
+      default: return [ // student
+        {path:'/dashboard',    label:'Dashboard',    icon:LayoutDashboard},
+        {path:'/ask-zone',     label:'Ask Zone',     icon:MessageCircle},
+        {path:'/mentors',      label:'Mentors',      icon:Users},
+        {path:'/sessions',     label:'Sessions',     icon:Clock},
+        {path:'/freelance',    label:'Freelance',    icon:Briefcase},
+        {path:'/profile',      label:'Profile',      icon:Activity},
+      ];
+    }
+  };
+
+  const sideLinks = getSideLinks();
 
   const stats   = getStats();
   const actions = getActions();

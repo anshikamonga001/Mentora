@@ -7,6 +7,7 @@ import {
   Star, Zap, Award,
   ChevronUp, Play,
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 /* ── Animations ── */
 const gradShift = keyframes`
@@ -140,6 +141,7 @@ const FeatGrid = styled.div`
 `;
 
 const FeatCard = styled(motion.div)<{$accent:string}>`
+  height:100%;
   background:#fff;border:1px solid #e2e8f0;border-radius:1.25rem;padding:2rem;
   transition:all .25s cubic-bezier(.4,0,.2,1);
   &:hover{
@@ -254,6 +256,7 @@ const ScrollTop = styled(motion.button)`
 
 /* ── Component ── */
 const Home: React.FC = () => {
+  const { user } = useAuth();
   const [showTop, setShowTop] = useState(false);
   useEffect(()=>{
     const h=()=>setShowTop(window.scrollY>400);
@@ -261,7 +264,12 @@ const Home: React.FC = () => {
     return()=>window.removeEventListener('scroll',h);
   },[]);
 
-  const features = [
+  const features = user?.role === 'tutor' ? [
+    {icon:MessageCircle,title:'Answer Zone',desc:'Browse student doubts by subject. Provide quality answers and earn reputation instantly.',color:'#6366f1',bg:'linear-gradient(135deg,#6366f1,#8b5cf6)',link:'/answer-zone'},
+    {icon:Users,title:'Host Sessions',desc:'Conduct 1:1 mentorship sessions. Provide career guidance and help students grow.',color:'#10b981',bg:'linear-gradient(135deg,#10b981,#059669)',link:'/sessions'},
+    {icon:Briefcase,title:'Freelance Board',desc:'Find freelance gigs or post projects. Build a real portfolio while tutoring.',color:'#f97316',bg:'linear-gradient(135deg,#f97316,#f59e0b)',link:'/freelance'},
+    {icon:Award,title:'XP & Reputation',desc:'Earn XP, unlock badges, climb the leaderboard by helping and contributing.',color:'#8b5cf6',bg:'linear-gradient(135deg,#8b5cf6,#a855f7)',link:'/profile'},
+  ] : [
     {icon:MessageCircle,title:'Ask Zone',desc:'Post doubts tagged by subject. Get quality answers from peers and expert tutors instantly.',color:'#6366f1',bg:'linear-gradient(135deg,#6366f1,#8b5cf6)',link:'/ask-zone'},
     {icon:Users,title:'Mentor Match',desc:'Connect 1:1 with vetted mentors for personalized career advice and skill development.',color:'#10b981',bg:'linear-gradient(135deg,#10b981,#059669)',link:'/mentors'},
     {icon:Briefcase,title:'Freelance Board',desc:'Find freelance gigs or post projects. Build a real portfolio while studying.',color:'#f97316',bg:'linear-gradient(135deg,#f97316,#f59e0b)',link:'/freelance'},
@@ -312,12 +320,28 @@ const Home: React.FC = () => {
           </HeroSub>
 
           <CTARow initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} transition={{duration:.6,delay:.3}}>
-            <PrimaryBtn to="/register" whileHover={{scale:1.03}} whileTap={{scale:.97}}>
-              Get started free <ArrowRight size={18}/>
-            </PrimaryBtn>
-            <GhostBtn to="/ask-zone" whileHover={{scale:1.03}} whileTap={{scale:.97}}>
-              <Play size={16}/> Explore Ask Zone
-            </GhostBtn>
+            {!user ? (
+              <>
+                <PrimaryBtn to="/register" whileHover={{scale:1.03}} whileTap={{scale:.97}}>
+                  Get started free <ArrowRight size={18}/>
+                </PrimaryBtn>
+                <GhostBtn to="/ask-zone" whileHover={{scale:1.03}} whileTap={{scale:.97}}>
+                  <Play size={16}/> Explore Ask Zone
+                </GhostBtn>
+              </>
+            ) : (
+              <>
+                {user.role === 'tutor' ? (
+                  <PrimaryBtn to="/answer-zone" whileHover={{scale:1.03}} whileTap={{scale:.97}}>
+                    Explore Answer Zone <ArrowRight size={18}/>
+                  </PrimaryBtn>
+                ) : (
+                  <PrimaryBtn to="/ask-zone" whileHover={{scale:1.03}} whileTap={{scale:.97}}>
+                    Explore Ask Zone <ArrowRight size={18}/>
+                  </PrimaryBtn>
+                )}
+              </>
+            )}
           </CTARow>
 
           <TrustRow initial={{opacity:0}} animate={{opacity:1}} transition={{duration:.6,delay:.5}}>
@@ -348,7 +372,7 @@ const Home: React.FC = () => {
           </SectionSub>
           <FeatGrid>
             {features.map((f,i)=>(
-              <Link key={f.title} to={f.link} style={{textDecoration:'none'}}>
+              <Link key={f.title} to={f.link} style={{textDecoration:'none', display:'block', height:'100%'}}>
                 <FeatCard
                   $accent={f.color}
                   initial={{opacity:0,y:32}}
@@ -437,15 +461,23 @@ const Home: React.FC = () => {
       {/* ── CTA BANNER ── */}
       <CTABanner>
         <CTATitle initial="hidden" whileInView="visible" viewport={{once:true}} variants={fade}>
-          Ready to start learning?
+          {user ? 'Ready to dive back in?' : 'Ready to start learning?'}
         </CTATitle>
         <CTASub initial="hidden" whileInView="visible" viewport={{once:true}} variants={fade} transition={{delay:.1}}>
-          Join 12,000+ students already growing with Mentora. Free forever.
+          {user 
+            ? 'Continue growing your skills with the Mentora community.' 
+            : 'Join 12,000+ students already growing with Mentora. Free forever.'}
         </CTASub>
         <motion.div initial="hidden" whileInView="visible" viewport={{once:true}} variants={fade} transition={{delay:.2}}>
-          <WhiteBtn to="/register" whileHover={{scale:1.03}} whileTap={{scale:.97}}>
-            Create free account <ArrowRight size={18}/>
-          </WhiteBtn>
+          {user ? (
+            <WhiteBtn to="/dashboard" whileHover={{scale:1.03}} whileTap={{scale:.97}}>
+              Go to Dashboard <ArrowRight size={18}/>
+            </WhiteBtn>
+          ) : (
+            <WhiteBtn to="/register" whileHover={{scale:1.03}} whileTap={{scale:.97}}>
+              Create free account <ArrowRight size={18}/>
+            </WhiteBtn>
+          )}
         </motion.div>
       </CTABanner>
 

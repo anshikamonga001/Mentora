@@ -20,6 +20,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { Avatar } from '../ui/Avatar';
 import { Badge } from '../ui/Badge';
+import NotificationsDropdown from './NotificationsDropdown';
 
 /* ── Styled Components ──────────────────────────── */
 const Nav = styled(motion.nav)<{ $scrolled: boolean }>`
@@ -401,6 +402,7 @@ const Navbar: React.FC = () => {
   const location = useLocation();
   const navigate  = useNavigate();
   const [scrolled,      setScrolled]      = useState(false);
+  const [showNotif,      setShowNotif]      = useState(false);
   const [showUserMenu,  setShowUserMenu]  = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
@@ -495,10 +497,11 @@ const Navbar: React.FC = () => {
             {user ? (
               <>
                 {/* Notifications */}
-                <IconBtn whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Bell size={17} />
-                  <NotifDot />
-                </IconBtn>
+                <NotificationsDropdown
+                  isOpen={showNotif}
+                  onToggle={() => { setShowNotif(v => !v); setShowUserMenu(false); }}
+                  onClose={() => setShowNotif(false)}
+                />
 
                 {/* User menu */}
                 <UserMenuWrapper data-usermenu>
