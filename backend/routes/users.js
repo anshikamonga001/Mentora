@@ -1,7 +1,8 @@
-const express = require('express');
-const { body, validationResult } = require('express-validator');
-const User = require('../models/User');
-const { auth, authorize } = require('../middleware/auth');
+import express from 'express';
+import { body, validationResult } from 'express-validator';
+import User from '../models/User.js';
+import { auth, authorize } from '../middleware/auth.js';
+import { sendEmail } from '../utils/sendEmail.js';
 
 const router = express.Router();
 
@@ -384,4 +385,50 @@ router.get('/:id', auth, async (req, res) => {
   }
 });
 
-module.exports = router;
+// @route   POST /api/users/subscribe
+// @desc    Subscribe to newsletter and send welcome email
+// @access  Public
+router.post('/subscribe', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Email is required' });
+    }
+
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+        <div style="background: linear-gradient(135deg, #6366f1, #8b5cf6); padding: 30px; text-align: center;">
+          <h1 style="color: white; margin: 0;">Mentora</h1>
+        </div>
+        <div style="padding: 30px; background: #ffffff;">
+          <h2 style="color: #0f172a; margin-top: 0;">Welcome aboard! 🎉</h2>
+          <p style="color: #475569; font-size: 16px; line-height: 1.6;">
+            Thank you for subscribing to the Mentora newsletter! We're thrilled to have you with us. 
+            You'll now receive our weekly updates featuring the best new mentors, top freelance gigs, and exclusive learning resources.
+          </p>
+          <a href="${process.env.CLIENT_URL || 'http://localhost:3000'}" style="display: inline-block; background: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; margin-top: 20px;">
+            Explore Mentora
+          </a>
+        </div>
+        <div style="background: #f8fafc; padding: 20px; text-align: center; color: #94a3b8; font-size: 14px;">
+          © ${new Date().getFullYear()} Mentora. All rights reserved.
+        </div>
+      </div>
+    `;
+
+    await sendEmail({
+      email,
+      subject: 'Welcome to Mentora! 🎉',
+      html: htmlContent
+    });
+
+    res.json({ success: true, message: 'Subscription successful. Welcome email sent!' });
+
+  } catch (error) {
+    console.error('Subscription error:', error);
+    res.status(500).json({ success: false, message: 'Failed to subscribe or send email.' });
+  }
+});
+
+export default router;

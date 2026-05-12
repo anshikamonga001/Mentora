@@ -29,7 +29,7 @@ import BidModal from '../components/freelance/BidModal';
 const FreelanceContainer = styled.div`
   min-height: 100vh;
   background: ${({ theme }) => theme.colors.gray[50]};
-  padding: ${({ theme }) => theme.spacing.xl} ${({ theme }) => theme.spacing.md};
+  padding: calc(68px + ${({ theme }) => theme.spacing.xl}) ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.xl};
 `;
 
 const FreelanceContent = styled.div`

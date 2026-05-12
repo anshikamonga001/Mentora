@@ -1,7 +1,7 @@
-const express = require("express");
-const User = require("../models/User");
-const Session = require("../models/Session");
-const { auth } = require("../middleware/auth");
+import express from "express";
+import User from "../models/User.js";
+import Session from "../models/Session.js";
+import { auth } from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -33,4 +33,4 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

@@ -1,6 +1,7 @@
 {
   "name": "mentora",
   "version": "1.0.0",
+  "type": "module",
   "description": "Learn. Solve. Grow Together - A student-powered ecosystem for doubt-solving, mentorship, and freelancing",
   "main": "server.js",
   "scripts": {

@@ -1,10 +1,10 @@
 
-const express = require('express');
-const jwt = require('jsonwebtoken');
-const { body, validationResult } = require('express-validator');
-const { OAuth2Client } = require('google-auth-library');
-const User = require('../models/User');
-const { auth } = require('../middleware/auth');
+import express from 'express';
+import jwt from 'jsonwebtoken';
+import { body, validationResult } from 'express-validator';
+import { OAuth2Client } from 'google-auth-library';
+import User from '../models/User.js';
+import { auth } from '../middleware/auth.js';
 
 const router = express.Router();
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -266,4 +266,4 @@ router.post('/logout', auth, (req, res) => {
   });
 });
 
-module.exports = router;
+export default router;

@@ -1,8 +1,8 @@
 import axios, { AxiosInstance, AxiosResponse } from "axios";
 
-/* ===================== BASE URL ===================== */
-// Vite-safe (no env typing needed)
+// Works with both React Scripts (REACT_APP_) and Vite (VITE_)
 const API_BASE_URL =
+  process.env.REACT_APP_API_URL ||
   (import.meta as any).env?.VITE_BACKEND_URL ||
   'http://localhost:5000/api';
 
@@ -87,6 +87,9 @@ export const usersAPI = {
 
   updateProfile: (userData: any): Promise<AxiosResponse<ApiResponse>> =>
     api.put("/users/profile", userData),
+
+  subscribeNewsletter: (email: string): Promise<AxiosResponse<ApiResponse>> =>
+    api.post("/users/subscribe", { email }),
 };
 
 /* ===================== DOUBTS API ===================== */

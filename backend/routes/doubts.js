@@ -58,4 +58,34 @@ router.post("/", auth, async (req, res) => {
   }
 });
 
+/* ===================== POST ANSWER TO DOUBT ===================== */
+router.post('/:id/answer', auth, async (req, res) => {
+  try {
+    const { content } = req.body;
+
+    if (!content || !content.trim()) {
+      return res.status(400).json({ success: false, message: 'Answer content required' });
+    }
+
+    // only tutors can post answers
+    if (req.user.role !== 'tutor') {
+      return res.status(403).json({ success: false, message: 'Only tutors can post answers' });
+    }
+
+    const doubt = await Doubt.findById(req.params.id);
+    if (!doubt) {
+      return res.status(404).json({ success: false, message: 'Doubt not found' });
+    }
+
+    const answer = { content: content.trim(), answeredBy: req.user.userId };
+    doubt.answers.push(answer);
+    await doubt.save();
+
+    res.json({ success: true, message: 'Answer posted successfully' });
+  } catch (err) {
+    console.error('POST ANSWER ERROR:', err);
+    res.status(500).json({ success: false, message: 'Failed to post answer' });
+  }
+});
+
 export default router;

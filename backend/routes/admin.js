@@ -1,5 +1,5 @@
-const express = require('express');
-const { auth, adminOnly } = require('../middleware/auth');
+import express from 'express';
+import { auth, adminOnly } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -27,4 +27,4 @@ router.put('/users/:id/approve', [auth, adminOnly], (req, res) => {
   });
 });
 
-module.exports = router;
+export default router;

@@ -1,700 +1,309 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { 
-  Users,
-  BarChart3,
-  Shield,
-  Settings,
-  TrendingUp,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Eye,
-  Edit,
-  Trash2,
-  Search,
-  Filter,
-  Download,
-  RefreshCw,
-  Calendar,
-  Clock,
-  DollarSign,
-  MessageSquare,
-  Star,
-  Award,
-  Activity,
-  UserCheck,
-  UserX,
-  Flag,
-  Mail,
-  Phone,
-  MapPin,
-  ChevronDown,
-  Plus,
-  MoreHorizontal
+import {
+  Users, BarChart3, Shield, Settings, TrendingUp,
+  Eye, Edit, Trash2,
+  Search, Filter, Download, RefreshCw, Calendar,
+  DollarSign, MessageSquare, Activity, Plus,
+  ChevronDown, AlertTriangle
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { Avatar } from '../components/ui/Avatar';
+import { Badge } from '../components/ui/Badge';
 
-const AdminContainer = styled.div`
-  min-height: 100vh;
-  background: ${({ theme }) => theme.colors.gray[50]};
-  padding: ${({ theme }) => theme.spacing.xl} ${({ theme }) => theme.spacing.md};
+/* ── Styles ── */
+const Page = styled.div`min-height:100vh;background:#f8fafc;padding-top:68px;`;
+
+const TopBand = styled.div`
+  background:linear-gradient(135deg,#1e1b4b 0%,#0f172a 100%);
+  padding:2.5rem 1.5rem;position:relative;overflow:hidden;
+  &::before{content:'';position:absolute;inset:0;
+    background-image:linear-gradient(rgba(99,102,241,.05) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(99,102,241,.05) 1px,transparent 1px);
+    background-size:40px 40px;pointer-events:none;}
 `;
-
-const AdminContent = styled.div`
-  max-width: 1400px;
-  margin: 0 auto;
+const TopInner = styled.div`max-width:1300px;margin:0 auto;position:relative;z-index:1;`;
+const Eyebrow = styled.div`
+  display:inline-flex;align-items:center;gap:.4rem;padding:.2rem .75rem;border-radius:9999px;
+  background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.25);
+  color:#818cf8;font-size:.75rem;font-weight:600;margin-bottom:.875rem;
 `;
+const PageTitle = styled.h1`font-size:2rem;font-weight:900;letter-spacing:-.04em;color:#f8fafc;margin-bottom:.375rem;`;
+const PageSub = styled.p`font-size:.9375rem;color:#64748b;margin:0;`;
 
-const Header = styled.div`
-  margin-bottom: ${({ theme }) => theme.spacing.xl};
+const Main = styled.div`max-width:1300px;margin:0 auto;padding:2rem 1.5rem;`;
+
+const Tabs = styled.div`
+  display:flex;gap:.25rem;background:#f1f5f9;padding:.3rem;border-radius:.875rem;margin-bottom:1.75rem;overflow-x:auto;
+  &::-webkit-scrollbar{display:none;}
 `;
-
-const Title = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.gray[900]};
-  margin-bottom: ${({ theme }) => theme.spacing.xs};
-`;
-
-const Subtitle = styled.p`
-  color: ${({ theme }) => theme.colors.gray[600]};
-  font-size: ${({ theme }) => theme.fontSizes.lg};
+const Tab = styled.button<{$active:boolean}>`
+  display:flex;align-items:center;gap:.4rem;
+  padding:.5rem 1rem;border-radius:.625rem;border:none;cursor:pointer;white-space:nowrap;
+  font-family:inherit;font-weight:600;font-size:.875rem;transition:all .2s;
+  background:${p=>p.$active?'#fff':'transparent'};
+  color:${p=>p.$active?'#4f46e5':'#64748b'};
+  box-shadow:${p=>p.$active?'0 1px 4px rgba(0,0,0,.08)':'none'};
 `;
 
 const StatsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: ${({ theme }) => theme.spacing.lg};
-  margin-bottom: ${({ theme }) => theme.spacing['2xl']};
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1.125rem;margin-bottom:1.75rem;
 `;
-
-const StatCard = styled(motion.div)`
-  background: ${({ theme }) => theme.colors.white};
-  border-radius: ${({ theme }) => theme.borderRadius.xl};
-  padding: ${({ theme }) => theme.spacing.xl};
-  box-shadow: ${({ theme }) => theme.shadows.sm};
-  border: 1px solid ${({ theme }) => theme.colors.gray[200]};
+const StatCard = styled(motion.div)<{$accent:string}>`
+  background:#fff;border:1px solid #e2e8f0;border-radius:1rem;padding:1.375rem;
+  position:relative;overflow:hidden;
+  &::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:${p=>p.$accent};}
+  &:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(0,0,0,.06);}
+  transition:all .2s;
 `;
-
-const StatHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: ${({ theme }) => theme.spacing.lg};
+const StatHead = styled.div`display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;`;
+const StatIco = styled.div<{$bg:string}>`
+  width:44px;height:44px;border-radius:.75rem;background:${p=>p.$bg};
+  display:flex;align-items:center;justify-content:center;color:#fff;
 `;
-
-const StatIcon = styled.div<{ $color: string }>`
-  width: 48px;
-  height: 48px;
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  background: ${({ $color }) => $color};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
+const StatTrend = styled.div<{$up:boolean}>`
+  font-size:.75rem;font-weight:700;
+  color:${p=>p.$up?'#059669':'#dc2626'};
+  background:${p=>p.$up?'rgba(16,185,129,.08)':'rgba(220,38,38,.08)'};
+  padding:.2rem .5rem;border-radius:9999px;
 `;
+const StatVal = styled.div`font-size:1.75rem;font-weight:900;color:#0f172a;letter-spacing:-.04em;margin-bottom:.2rem;`;
+const StatLbl = styled.div`font-size:.8125rem;color:#64748b;font-weight:500;`;
 
-const StatTrend = styled.div<{ $positive: boolean }>`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.xs};
-  color: ${({ theme, $positive }) => $positive ? theme.colors.success[600] : theme.colors.error[600]};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
+const Panel = styled.div`background:#fff;border:1px solid #e2e8f0;border-radius:1rem;overflow:hidden;`;
+const PHead = styled.div`
+  padding:1.25rem 1.5rem;border-bottom:1px solid #e2e8f0;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;
 `;
+const PTitle = styled.h2`font-size:1rem;font-weight:700;color:#0f172a;`;
+const PActions = styled.div`display:flex;align-items:center;gap:.625rem;flex-wrap:wrap;`;
 
-const StatValue = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: ${({ theme }) => theme.fontWeights.bold};
-  color: ${({ theme }) => theme.colors.gray[900]};
-  margin-bottom: ${({ theme }) => theme.spacing.xs};
-`;
-
-const StatLabel = styled.div`
-  color: ${({ theme }) => theme.colors.gray[600]};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-`;
-
-const TabsContainer = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing.md};
-  margin-bottom: ${({ theme }) => theme.spacing.xl};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.gray[200]};
-  overflow-x: auto;
-`;
-
-const Tab = styled.button<{ $active: boolean }>`
-  padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.lg};
-  border: none;
-  background: none;
-  color: ${({ theme, $active }) => $active ? theme.colors.primary[600] : theme.colors.gray[600]};
-  font-weight: ${({ theme, $active }) => $active ? theme.fontWeights.semibold : theme.fontWeights.medium};
-  border-bottom: 2px solid ${({ theme, $active }) => $active ? theme.colors.primary[500] : 'transparent'};
-  cursor: pointer;
-  transition: all ${({ theme }) => theme.transitions.default};
-  white-space: nowrap;
-  
-  &:hover {
-    color: ${({ theme }) => theme.colors.primary[600]};
-  }
-`;
-
-const ContentSection = styled.div`
-  background: ${({ theme }) => theme.colors.white};
-  border-radius: ${({ theme }) => theme.borderRadius.xl};
-  box-shadow: ${({ theme }) => theme.shadows.sm};
-  border: 1px solid ${({ theme }) => theme.colors.gray[200]};
-  overflow: hidden;
-`;
-
-const SectionHeader = styled.div`
-  padding: ${({ theme }) => theme.spacing.xl};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.gray[200]};
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.md};
-  
-  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
-    flex-direction: column;
-    align-items: stretch;
-  }
-`;
-
-const SectionTitle = styled.h2`
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.gray[900]};
-`;
-
-const SectionActions = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing.sm};
-  align-items: center;
-`;
-
-const ActionButton = styled.button`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.xs};
-  background: ${({ theme }) => theme.colors.white};
-  border: 1px solid ${({ theme }) => theme.colors.gray[300]};
-  padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  color: ${({ theme }) => theme.colors.gray[700]};
-  cursor: pointer;
-  transition: all ${({ theme }) => theme.transitions.default};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  
-  &:hover {
-    background: ${({ theme }) => theme.colors.gray[50]};
-    border-color: ${({ theme }) => theme.colors.gray[400]};
-  }
-`;
-
-const PrimaryButton = styled(ActionButton)`
-  background: ${({ theme }) => theme.colors.primary[500]};
-  color: white;
-  border-color: ${({ theme }) => theme.colors.primary[500]};
-  
-  &:hover {
-    background: ${({ theme }) => theme.colors.primary[600]};
-    border-color: ${({ theme }) => theme.colors.primary[600]};
-  }
-`;
-
-const SearchContainer = styled.div`
-  position: relative;
-  flex: 1;
-  max-width: 300px;
-`;
-
+const SearchWrap = styled.div`position:relative;`;
+const SearchIco = styled.div`position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#94a3b8;display:flex;`;
 const SearchInput = styled.input`
-  width: 100%;
-  padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.sm} 40px;
-  border: 1px solid ${({ theme }) => theme.colors.gray[300]};
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  transition: all ${({ theme }) => theme.transitions.default};
-  
-  &:focus {
-    outline: none;
-    border-color: ${({ theme }) => theme.colors.primary[500]};
-    box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.primary[100]};
-  }
+  padding:.5rem .75rem .5rem 2.25rem;border:1.5px solid #e2e8f0;border-radius:.75rem;
+  font-size:.8125rem;font-family:inherit;color:#0f172a;width:220px;
+  &:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.1);}
+  &::placeholder{color:#cbd5e1;}
+`;
+const ABtn = styled.button`
+  display:flex;align-items:center;gap:.375rem;padding:.5rem .875rem;
+  border:1.5px solid #e2e8f0;border-radius:.75rem;background:#fff;color:#475569;
+  font-size:.8125rem;font-weight:600;cursor:pointer;font-family:inherit;
+  &:hover{border-color:#6366f1;color:#6366f1;}transition:all .2s;
+`;
+const PrimaryABtn = styled(ABtn)`
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;
+  box-shadow:0 3px 10px rgba(99,102,241,.3);&:hover{color:#fff;opacity:.92;}
 `;
 
-const SearchIcon = styled(Search)`
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: ${({ theme }) => theme.colors.gray[400]};
+/* Table */
+const Table = styled.table`width:100%;border-collapse:collapse;`;
+const THead = styled.thead`background:#f8fafc;`;
+const TR = styled.tr`border-bottom:1px solid #f1f5f9;&:last-child{border:none;}&:hover{background:#fafafa;}`;
+const TH = styled.th`padding:.875rem 1.25rem;text-align:left;font-size:.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;`;
+const TD = styled.td`padding:.875rem 1.25rem;font-size:.875rem;color:#475569;`;
+const UserCell = styled.div`display:flex;align-items:center;gap:.75rem;`;
+const UserTexts = styled.div``;
+const UserName = styled.div`font-size:.9rem;font-weight:700;color:#0f172a;`;
+const UserEmail = styled.div`font-size:.75rem;color:#94a3b8;`;
+
+const roleVariant: Record<string,'primary'|'success'|'secondary'|'warning'|'neutral'> = {
+  student:'primary', tutor:'success', freelancer:'secondary', admin:'warning'
+};
+const statusVariant: Record<string,'success'|'neutral'|'warning'> = {
+  active:'success', inactive:'neutral', suspended:'warning'
+};
+
+const IconBtn = styled.button`
+  width:30px;height:30px;border-radius:.5rem;border:1px solid #e2e8f0;background:#fff;
+  color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  &:hover{border-color:rgba(99,102,241,.3);color:#6366f1;}transition:all .15s;
 `;
 
-const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
+const ChartBox = styled.div`
+  height:320px;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:1rem;color:#94a3b8;padding:2rem;
 `;
 
-const TableHeader = styled.thead`
-  background: ${({ theme }) => theme.colors.gray[50]};
+const Unauthorized = styled.div`
+  min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;
 `;
 
-const TableRow = styled.tr`
-  border-bottom: 1px solid ${({ theme }) => theme.colors.gray[200]};
-  
-  &:hover {
-    background: ${({ theme }) => theme.colors.gray[50]};
-  }
-`;
+const mockUsers = [
+  {id:1,name:'John Doe',       email:'john@example.com',   role:'student',    status:'active',    joinDate:'Jan 15, 2024', lastActive:'2 hours ago'},
+  {id:2,name:'Sarah Johnson',  email:'sarah@example.com',  role:'tutor',      status:'active',    joinDate:'Nov 20, 2023', lastActive:'1 day ago'},
+  {id:3,name:'Mike Chen',      email:'mike@example.com',   role:'freelancer', status:'suspended', joinDate:'Feb 10, 2024', lastActive:'1 week ago'},
+  {id:4,name:'David Wilson',   email:'david@example.com',  role:'student',    status:'inactive',  joinDate:'Mar 01, 2024', lastActive:'Never'},
+  {id:5,name:'Priya Sharma',   email:'priya@example.com',  role:'tutor',      status:'active',    joinDate:'Dec 05, 2023', lastActive:'30 min ago'},
+  {id:6,name:'Alex Rivera',    email:'alex@example.com',   role:'freelancer', status:'active',    joinDate:'Apr 12, 2024', lastActive:'3 days ago'},
+];
 
-const TableHeaderCell = styled.th`
-  padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.lg};
-  text-align: left;
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  color: ${({ theme }) => theme.colors.gray[700]};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-`;
-
-const TableCell = styled.td`
-  padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.lg};
-  color: ${({ theme }) => theme.colors.gray[600]};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-`;
-
-const UserAvatar = styled.div`
-  width: 32px;
-  height: 32px;
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary[500]}, ${({ theme }) => theme.colors.secondary[500]});
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: ${({ theme }) => theme.fontWeights.semibold};
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  flex-shrink: 0;
-`;
-
-const UserInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.sm};
-`;
-
-const UserDetails = styled.div``;
-
-const UserName = styled.div`
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  color: ${({ theme }) => theme.colors.gray[900]};
-  margin-bottom: 2px;
-`;
-
-const UserEmail = styled.div`
-  color: ${({ theme }) => theme.colors.gray[500]};
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-`;
-
-const StatusBadge = styled.span<{ $status: 'active' | 'inactive' | 'suspended' }>`
-  display: inline-flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.xs};
-  padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  
-  ${({ $status, theme }) => {
-    switch ($status) {
-      case 'active':
-        return `
-          background: ${theme.colors.success[100]};
-          color: ${theme.colors.success[700]};
-        `;
-      case 'inactive':
-        return `
-          background: ${theme.colors.gray[100]};
-          color: ${theme.colors.gray[700]};
-        `;
-      default:
-        return '';
-    }
-  }}
-`;
-
-const RoleBadge = styled.span<{ $role: 'student' | 'tutor' | 'freelancer' | 'admin' }>`
-  padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  font-weight: ${({ theme }) => theme.fontWeights.medium};
-  
-  ${({ $role, theme }) => {
-    switch ($role) {
-      case 'student':
-        return `
-          background: ${theme.colors.primary[100]};
-          color: ${theme.colors.primary[700]};
-        `;
-      case 'tutor':
-        return `
-          background: ${theme.colors.success[100]};
-          color: ${theme.colors.success[700]};
-        `;
-      case 'freelancer':
-        return `
-          background: ${theme.colors.secondary[100]};
-          color: ${theme.colors.secondary[700]};
-        `;
-      case 'admin':
-        return `
-          background: ${theme.colors.error[100]};
-          color: ${theme.colors.error[700]};
-        `;
-      default:
-        return '';
-    }
-  }}
-`;
-
-const ActionMenu = styled.div`
-  position: relative;
-  display: inline-block;
-`;
-
-const MenuButton = styled.button`
-  background: none;
-  border: none;
-  color: ${({ theme }) => theme.colors.gray[500]};
-  cursor: pointer;
-  padding: ${({ theme }) => theme.spacing.xs};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  transition: all ${({ theme }) => theme.transitions.default};
-  
-  &:hover {
-    background: ${({ theme }) => theme.colors.gray[100]};
-    color: ${({ theme }) => theme.colors.gray[700]};
-  }
-`;
-
-const ChartContainer = styled.div`
-  padding: ${({ theme }) => theme.spacing.xl};
-  height: 400px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: ${({ theme }) => theme.colors.gray[500]};
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-`;
+const stats = [
+  {label:'Total Users',    value:'12,847', trend:'+12%', up:true,  icon:Users,        bg:'linear-gradient(135deg,#6366f1,#818cf8)', accent:'#6366f1'},
+  {label:'Active Sessions',value:'3,421',  trend:'+8%',  up:true,  icon:Activity,     bg:'linear-gradient(135deg,#10b981,#34d399)', accent:'#10b981'},
+  {label:'Revenue',        value:'$89.4K', trend:'+23%', up:true,  icon:DollarSign,   bg:'linear-gradient(135deg,#8b5cf6,#a855f7)', accent:'#8b5cf6'},
+  {label:'Support Tickets',value:'127',    trend:'-15%', up:false, icon:MessageSquare,bg:'linear-gradient(135deg,#f59e0b,#fbbf24)', accent:'#f59e0b'},
+];
 
 const Admin: React.FC = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('overview');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [tab, setTab] = useState<'overview'|'users'|'content'|'reports'|'settings'>('overview');
+  const [search, setSearch] = useState('');
 
-  const stats = [
-    {
-      label: 'Total Users',
-      value: '12,847',
-      trend: '+12%',
-      positive: true,
-      icon: Users,
-      color: '#3B82F6'
-    },
-    {
-      label: 'Active Sessions',
-      value: '3,421',
-      trend: '+8%',
-      positive: true,
-      icon: Activity,
-      color: '#10B981'
-    },
-    {
-      label: 'Revenue',
-      value: '$89,432',
-      trend: '+23%',
-      positive: true,
-      icon: DollarSign,
-      color: '#8B5CF6'
-    },
-    {
-      label: 'Support Tickets',
-      value: '127',
-      trend: '-15%',
-      positive: false,
-      icon: MessageSquare,
-      color: '#F59E0B'
-    }
-  ];
-
-  const mockUsers = [
-    {
-      id: 1,
-      name: 'John Doe',
-      email: 'john@example.com',
-      role: 'student' as const,
-      status: 'active' as const,
-      joinDate: '2024-01-15',
-      lastActive: '2 hours ago'
-    },
-    {
-      id: 2,
-      name: 'Sarah Johnson',
-      email: 'sarah@example.com',
-      role: 'tutor' as const,
-      status: 'active' as const,
-      joinDate: '2023-11-20',
-      lastActive: '1 day ago'
-    },
-    {
-      id: 3,
-      name: 'Mike Chen',
-      email: 'mike@example.com',
-      role: 'freelancer' as const,
-      status: 'suspended' as const,
-      joinDate: '2024-02-10',
-      lastActive: '1 week ago'
-    },
-    {
-      id: 4,
-      name: 'David Wilson',
-      email: 'david@example.com',
-      role: 'student' as const,
-      status: 'inactive' as const,
-      joinDate: '2024-03-01',
-      lastActive: 'Never'
-    },
-    {
-      id: 5,
-      name: 'Admin User',
-      email: 'admin@example.com',
-      role: 'admin' as const,
-      status: 'active' as const,
-      joinDate: '2023-01-01',
-      lastActive: '5 minutes ago'
-    }
-  ];
-
-  const renderOverview = () => (
-    <>
-      <StatsGrid>
-        {stats.map((stat, index) => (
-          <StatCard
-            key={index}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: index * 0.1 }}
-          >
-            <StatHeader>
-              <StatIcon $color={stat.color}>
-                <stat.icon size={24} />
-              </StatIcon>
-              <StatTrend $positive={stat.positive}>
-                <TrendingUp size={16} />
-                {stat.trend}
-              </StatTrend>
-            </StatHeader>
-            <StatValue>{stat.value}</StatValue>
-            <StatLabel>{stat.label}</StatLabel>
-          </StatCard>
-        ))}
-      </StatsGrid>
-
-      <ContentSection>
-        <SectionHeader>
-          <SectionTitle>Analytics Overview</SectionTitle>
-          <SectionActions>
-            <ActionButton>
-              <Calendar size={16} />
-              Last 30 days
-              <ChevronDown size={16} />
-            </ActionButton>
-            <ActionButton>
-              <Download size={16} />
-              Export
-            </ActionButton>
-          </SectionActions>
-        </SectionHeader>
-        <ChartContainer>
-          <div>Analytics charts would be rendered here</div>
-        </ChartContainer>
-      </ContentSection>
-    </>
-  );
-
-  const renderUsers = () => (
-    <ContentSection>
-      <SectionHeader>
-        <SectionTitle>User Management</SectionTitle>
-        <SectionActions>
-          <SearchContainer>
-            <SearchIcon size={16} />
-            <SearchInput
-              type="text"
-              placeholder="Search users..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </SearchContainer>
-          <ActionButton>
-            <Filter size={16} />
-            Filter
-          </ActionButton>
-          <ActionButton>
-            <RefreshCw size={16} />
-            Refresh
-          </ActionButton>
-          <PrimaryButton>
-            <Plus size={16} />
-            Add User
-          </PrimaryButton>
-        </SectionActions>
-      </SectionHeader>
-      
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHeaderCell>User</TableHeaderCell>
-            <TableHeaderCell>Role</TableHeaderCell>
-            <TableHeaderCell>Status</TableHeaderCell>
-            <TableHeaderCell>Join Date</TableHeaderCell>
-            <TableHeaderCell>Last Active</TableHeaderCell>
-            <TableHeaderCell>Actions</TableHeaderCell>
-          </TableRow>
-        </TableHeader>
-        <tbody>
-          {mockUsers.map((user) => (
-            <TableRow key={user.id}>
-              <TableCell>
-                <UserInfo>
-                  <UserAvatar>
-                    {user.name.split(' ').map(n => n[0]).join('')}
-                  </UserAvatar>
-                  <UserDetails>
-                    <UserName>{user.name}</UserName>
-                    <UserEmail>{user.email}</UserEmail>
-                  </UserDetails>
-                </UserInfo>
-              </TableCell>
-              <TableCell>
-                <RoleBadge $role={user.role}>
-                  {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                </RoleBadge>
-              </TableCell>
-              <TableCell>
-                <StatusBadge $status={user.status}>
-                  {user.status === 'active' && <CheckCircle size={12} />}
-                  {user.status === 'inactive' && <Clock size={12} />}
-                  {user.status === 'suspended' && <XCircle size={12} />}
-                  {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
-                </StatusBadge>
-              </TableCell>
-              <TableCell>{user.joinDate}</TableCell>
-              <TableCell>{user.lastActive}</TableCell>
-              <TableCell>
-                <ActionMenu>
-                  <MenuButton>
-                    <MoreHorizontal size={16} />
-                  </MenuButton>
-                </ActionMenu>
-              </TableCell>
-            </TableRow>
-          ))}
-        </tbody>
-      </Table>
-    </ContentSection>
-  );
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'overview':
-        return renderOverview();
-      case 'users':
-        return renderUsers();
-      case 'content':
-        return (
-          <ContentSection>
-            <SectionHeader>
-              <SectionTitle>Content Moderation</SectionTitle>
-            </SectionHeader>
-            <ChartContainer>
-              Content moderation tools would be here
-            </ChartContainer>
-          </ContentSection>
-        );
-      case 'reports':
-        return (
-          <ContentSection>
-            <SectionHeader>
-              <SectionTitle>Reports & Analytics</SectionTitle>
-            </SectionHeader>
-            <ChartContainer>
-              Detailed reports and analytics would be here
-            </ChartContainer>
-          </ContentSection>
-        );
-      case 'settings':
-        return (
-          <ContentSection>
-            <SectionHeader>
-              <SectionTitle>System Settings</SectionTitle>
-            </SectionHeader>
-            <ChartContainer>
-              System configuration settings would be here
-            </ChartContainer>
-          </ContentSection>
-        );
-      default:
-        return renderOverview();
-    }
-  };
-
-  // Check if user is admin
   if (user?.role !== 'admin') {
     return (
-      <AdminContainer>
-        <AdminContent>
-          <div style={{ textAlign: 'center', padding: '4rem 0' }}>
-            <Shield size={64} color="#EF4444" />
-            <h2 style={{ marginTop: '1rem', color: '#374151' }}>Access Denied</h2>
-            <p style={{ color: '#6B7280' }}>You don't have permission to access this page.</p>
+      <Page>
+        <TopBand><TopInner><PageTitle>Admin Panel</PageTitle></TopInner></TopBand>
+        <Unauthorized>
+          <div style={{width:80,height:80,borderRadius:'1.25rem',background:'rgba(239,68,68,.1)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 1.25rem'}}>
+            <Shield size={36} color="#ef4444"/>
           </div>
-        </AdminContent>
-      </AdminContainer>
+          <h2 style={{color:'#0f172a',marginBottom:'.5rem'}}>Access Denied</h2>
+          <p style={{color:'#64748b',maxWidth:360}}>You don't have permission to access the Admin Panel. Contact your administrator if you believe this is an error.</p>
+        </Unauthorized>
+      </Page>
     );
   }
 
+  const filtered = mockUsers.filter(u =>
+    u.name.toLowerCase().includes(search.toLowerCase()) ||
+    u.email.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
-    <AdminContainer>
-      <AdminContent>
-        <Header>
-          <Title>Admin Dashboard</Title>
-          <Subtitle>Manage users, content, and system settings</Subtitle>
-        </Header>
+    <Page>
+      <TopBand>
+        <TopInner>
+          <Eyebrow><Shield size={12}/>Admin</Eyebrow>
+          <PageTitle>Admin Dashboard</PageTitle>
+          <PageSub>Manage users, content, and platform settings.</PageSub>
+        </TopInner>
+      </TopBand>
 
-        <TabsContainer>
-          <Tab $active={activeTab === 'overview'} onClick={() => setActiveTab('overview')}>
-            Overview
-          </Tab>
-          <Tab $active={activeTab === 'users'} onClick={() => setActiveTab('users')}>
-            Users
-          </Tab>
-          <Tab $active={activeTab === 'content'} onClick={() => setActiveTab('content')}>
-            Content
-          </Tab>
-          <Tab $active={activeTab === 'reports'} onClick={() => setActiveTab('reports')}>
-            Reports
-          </Tab>
-          <Tab $active={activeTab === 'settings'} onClick={() => setActiveTab('settings')}>
-            Settings
-          </Tab>
-        </TabsContainer>
+      <Main>
+        <Tabs>
+          {([
+            {id:'overview', icon:BarChart3, label:'Overview'},
+            {id:'users',    icon:Users,     label:'Users'},
+            {id:'content',  icon:AlertTriangle, label:'Content'},
+            {id:'reports',  icon:TrendingUp, label:'Reports'},
+            {id:'settings', icon:Settings,  label:'Settings'},
+          ] as const).map(t=>(
+            <Tab key={t.id} $active={tab===t.id} onClick={()=>setTab(t.id)}>
+              <t.icon size={15}/>{t.label}
+            </Tab>
+          ))}
+        </Tabs>
 
-        {renderContent()}
-      </AdminContent>
-    </AdminContainer>
+        {tab === 'overview' && (
+          <>
+            <StatsGrid>
+              {stats.map((s,i)=>(
+                <StatCard key={s.label} $accent={s.accent} initial={{opacity:0,y:16}} animate={{opacity:1,y:0}} transition={{delay:i*.08}}>
+                  <StatHead>
+                    <StatIco $bg={s.bg}><s.icon size={20}/></StatIco>
+                    <StatTrend $up={s.up}>{s.trend}</StatTrend>
+                  </StatHead>
+                  <StatVal>{s.value}</StatVal>
+                  <StatLbl>{s.label}</StatLbl>
+                </StatCard>
+              ))}
+            </StatsGrid>
+
+            <Panel>
+              <PHead>
+                <PTitle>Platform Analytics</PTitle>
+                <PActions>
+                  <ABtn><Calendar size={14}/>Last 30 days<ChevronDown size={14}/></ABtn>
+                  <ABtn><Download size={14}/>Export</ABtn>
+                </PActions>
+              </PHead>
+              <ChartBox>
+                <BarChart3 size={48} color="#e2e8f0"/>
+                <div>Analytics charts will render here once connected to real data</div>
+              </ChartBox>
+            </Panel>
+          </>
+        )}
+
+        {tab === 'users' && (
+          <Panel>
+            <PHead>
+              <PTitle>User Management</PTitle>
+              <PActions>
+                <SearchWrap>
+                  <SearchIco><Search size={14}/></SearchIco>
+                  <SearchInput placeholder="Search users…" value={search} onChange={e=>setSearch(e.target.value)}/>
+                </SearchWrap>
+                <ABtn><Filter size={14}/>Filter</ABtn>
+                <ABtn><RefreshCw size={14}/>Refresh</ABtn>
+                <PrimaryABtn><Plus size={14}/>Add User</PrimaryABtn>
+              </PActions>
+            </PHead>
+            <div style={{overflowX:'auto'}}>
+              <Table>
+                <THead>
+                  <TR>
+                    <TH>User</TH><TH>Role</TH><TH>Status</TH><TH>Joined</TH><TH>Last Active</TH><TH>Actions</TH>
+                  </TR>
+                </THead>
+                <tbody>
+                  {filtered.map((u,i)=>(
+                    <motion.tr key={u.id} initial={{opacity:0}} animate={{opacity:1}} transition={{delay:i*.04}}
+                      style={{borderBottom:'1px solid #f1f5f9'}} onMouseEnter={e=>(e.currentTarget.style.background='#fafafa')}
+                      onMouseLeave={e=>(e.currentTarget.style.background='transparent')}>
+                      <TD>
+                        <UserCell>
+                          <Avatar name={u.name} size="sm"/>
+                          <UserTexts>
+                            <UserName>{u.name}</UserName>
+                            <UserEmail>{u.email}</UserEmail>
+                          </UserTexts>
+                        </UserCell>
+                      </TD>
+                      <TD><Badge variant={roleVariant[u.role]} size="sm">{u.role.charAt(0).toUpperCase()+u.role.slice(1)}</Badge></TD>
+                      <TD><Badge variant={statusVariant[u.status]} size="sm" dot>{u.status.charAt(0).toUpperCase()+u.status.slice(1)}</Badge></TD>
+                      <TD>{u.joinDate}</TD>
+                      <TD>{u.lastActive}</TD>
+                      <TD>
+                        <div style={{display:'flex',gap:'.375rem'}}>
+                          <IconBtn title="View"><Eye size={13}/></IconBtn>
+                          <IconBtn title="Edit"><Edit size={13}/></IconBtn>
+                          <IconBtn title="Delete" style={{color:'#ef4444'}} onClick={()=>{}}><Trash2 size={13}/></IconBtn>
+                        </div>
+                      </TD>
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </Table>
+            </div>
+          </Panel>
+        )}
+
+        {tab === 'content' && (
+          <Panel>
+            <PHead><PTitle>Content Moderation</PTitle></PHead>
+            <ChartBox><AlertTriangle size={48} color="#e2e8f0"/><div>Content moderation tools coming soon</div></ChartBox>
+          </Panel>
+        )}
+
+        {tab === 'reports' && (
+          <Panel>
+            <PHead><PTitle>Reports & Analytics</PTitle><ABtn><Download size={14}/>Export Report</ABtn></PHead>
+            <ChartBox><TrendingUp size={48} color="#e2e8f0"/><div>Detailed reports coming soon</div></ChartBox>
+          </Panel>
+        )}
+
+        {tab === 'settings' && (
+          <Panel>
+            <PHead><PTitle>System Settings</PTitle></PHead>
+            <ChartBox><Settings size={48} color="#e2e8f0"/><div>System configuration coming soon</div></ChartBox>
+          </Panel>
+        )}
+      </Main>
+    </Page>
   );
 };
 

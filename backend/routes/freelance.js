@@ -1,5 +1,5 @@
-const express = require('express');
-const { auth } = require('../middleware/auth');
+import express from 'express';
+import { auth } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -27,4 +27,4 @@ router.post('/', auth, (req, res) => {
   });
 });
 
-module.exports = router;
+export default router;

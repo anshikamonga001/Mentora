@@ -1,10 +1,10 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+import jwt from 'jsonwebtoken';
+import User from '../models/User.js';
 
 /* ============================
-   AUTH MIDDLEWARE
+  AUTH MIDDLEWARE (ESM)
 ============================ */
-const auth = async (req, res, next) => {
+export const auth = async (req, res, next) => {
   try {
     const authHeader = req.header("Authorization");
 
@@ -47,7 +47,7 @@ const auth = async (req, res, next) => {
 /* ============================
    ROLE-BASED AUTH
 ============================ */
-const authorize = (...roles) => (req, res, next) => {
+export const authorize = (...roles) => (req, res, next) => {
   if (!req.user || !roles.includes(req.user.role)) {
     return res.status(403).json({
       success: false,
@@ -57,7 +57,7 @@ const authorize = (...roles) => (req, res, next) => {
   next();
 };
 
-const adminOnly = (req, res, next) => {
+export const adminOnly = (req, res, next) => {
   if (!req.user || req.user.role !== "admin") {
     return res.status(403).json({
       success: false,
@@ -67,14 +67,7 @@ const adminOnly = (req, res, next) => {
   next();
 };
 
-const approvedOnly = (req, res, next) => {
+export const approvedOnly = (req, res, next) => {
   // Previously enforced admin approval; now allow all authenticated users.
   return next();
-};
-
-module.exports = {
-  auth,
-  authorize,
-  adminOnly,
-  approvedOnly,
 };

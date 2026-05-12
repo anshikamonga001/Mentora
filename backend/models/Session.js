@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const sessionSchema = new mongoose.Schema({
   mentor: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
@@ -14,5 +14,4 @@ const sessionSchema = new mongoose.Schema({
 
   createdAt: { type: Date, default: Date.now },
 });
-
-module.exports = mongoose.model('Session', sessionSchema);
+export default mongoose.model('Session', sessionSchema);

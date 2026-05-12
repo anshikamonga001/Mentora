@@ -42,7 +42,7 @@ function App() {
             <GlobalStyles />
             <div className="App">
               <Navbar />
-              <main>
+              <main style={{ minHeight: '100vh' }}>
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/login" element={<Login />} />
@@ -182,8 +182,17 @@ function App() {
                 toastOptions={{
                   duration: 4000,
                   style: {
-                    background: '#363636',
-                    color: '#fff',
+                    background: '#1e293b',
+                    color: '#f8fafc',
+                    borderRadius: '0.75rem',
+                    border: '1px solid #334155',
+                    fontSize: '0.9rem',
+                    fontFamily: "'Plus Jakarta Sans', sans-serif",
+                    fontWeight: 500,
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+                  },
+                  success: {
+                    iconTheme: { primary: '#6366f1', secondary: '#fff' },
                   },
                 }}
               />
