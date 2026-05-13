@@ -8,6 +8,7 @@ import { GlobalStyles } from './styles/GlobalStyles';
 import { theme } from './styles/theme';
 import Navbar from './components/common/Navbar';
 import Footer from './components/common/Footer';
+import NewsletterPopup from './components/common/NewsletterPopup';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -19,6 +20,7 @@ import AnswerZone from './pages/AnswerZone';
 import Mentors from './pages/Mentors';
 import Freelance from './pages/Freelance';
 import Admin from './pages/Admin';
+import ContactUs from './pages/ContactUs';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
@@ -47,6 +49,7 @@ function App() {
                   <Route path="/" element={<Home />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
+                  <Route path="/contact" element={<ContactUs />} />
                   <Route
                     path="/dashboard"
                     element={
@@ -177,6 +180,7 @@ function App() {
                 </Routes>
               </main>
               <Footer />
+              <NewsletterPopup />
               <Toaster
                 position="top-right"
                 toastOptions={{

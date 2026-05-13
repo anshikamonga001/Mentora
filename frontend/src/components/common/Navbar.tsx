@@ -162,16 +162,6 @@ const IconBtn = styled(motion.button)`
   }
 `;
 
-const NotifDot = styled.span`
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 8px;
-  height: 8px;
-  background: #ef4444;
-  border-radius: 50%;
-  border: 2px solid white;
-`;
 
 const UserMenuWrapper = styled.div`
   position: relative;

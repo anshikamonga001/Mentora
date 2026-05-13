@@ -17,6 +17,7 @@ import adminRoutes from "./routes/admin.js";
 import sessionRoutes from "./routes/sessions.js";
 import googleRoutes from "./routes/google.js";
 import notificationRoutes from "./routes/notifications.js";
+import subscribeRoutes from "./routes/subscribe.js";
 
 // ================================
 // FIX __dirname FOR ESM
@@ -82,6 +83,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/sessions", sessionRoutes);
 app.use("/api/google", googleRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/subscribe", subscribeRoutes);
 
 // ================================
 // HEALTH

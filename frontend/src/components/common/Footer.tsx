@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { 
   Mail, 
   Phone, 
@@ -62,6 +62,21 @@ const SectionDescription = styled.p`
 `;
 
 const FooterLink = styled.a`
+  color: ${({ theme }) => theme.colors.gray[300]};
+  text-decoration: none;
+  margin-bottom: ${({ theme }) => theme.spacing.sm};
+  transition: all ${({ theme }) => theme.transitions.default};
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.xs};
+  
+  &:hover {
+    color: ${({ theme }) => theme.colors.primary[400]};
+    transform: translateX(4px);
+  }
+`;
+
+const FooterRouterLink = styled(Link)`
   color: ${({ theme }) => theme.colors.gray[300]};
   text-decoration: none;
   margin-bottom: ${({ theme }) => theme.spacing.sm};
@@ -157,6 +172,52 @@ const Logo = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing.md};
 `;
 
+const NewsletterBox = styled.div`
+  margin-top: ${({ theme }) => theme.spacing.md};
+`;
+
+const NewsletterTitle = styled.p`
+  color: ${({ theme }) => theme.colors.gray[200]};
+  font-weight: ${({ theme }) => theme.fontWeights.semibold};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  margin-bottom: ${({ theme }) => theme.spacing.sm};
+`;
+
+const NewsletterInput = styled.input`
+  width: 100%;
+  padding: 0.6rem 0.875rem;
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  border: 1px solid ${({ theme }) => theme.colors.gray[600]};
+  background: ${({ theme }) => theme.colors.gray[700]};
+  color: ${({ theme }) => theme.colors.white};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  margin-bottom: ${({ theme }) => theme.spacing.xs};
+  outline: none;
+  &::placeholder { color: ${({ theme }) => theme.colors.gray[400]}; }
+  &:focus { border-color: ${({ theme }) => theme.colors.primary[400]}; }
+`;
+
+const SubscribeBtn = styled(motion.button)`
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  border: none;
+  background: linear-gradient(135deg,
+    ${({ theme }) => theme.colors.primary[500]},
+    ${({ theme }) => theme.colors.secondary[500]});
+  color: white;
+  font-weight: ${({ theme }) => theme.fontWeights.bold};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  cursor: pointer;
+  font-family: inherit;
+`;
+
+const SuccessMsg = styled.p`
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  color: #6ee7b7;
+  margin-top: ${({ theme }) => theme.spacing.xs};
+`;
+
 const LogoIcon = styled.div`
   width: 40px;
   height: 40px;
@@ -178,6 +239,26 @@ const LogoText = styled.span`
 
 const Footer: React.FC = () => {
   const { user } = useAuth();
+  const [email, setEmail]       = React.useState('');
+  const [subscribed, setSubscribed] = React.useState(false);
+
+  const handleSubscribe = async () => {
+    if (!email || !email.includes('@')) return;
+    try {
+      const res  = await fetch('http://localhost:5000/api/subscribe', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSubscribed(true);
+        setEmail('');
+      }
+    } catch (err) {
+      console.error('Subscribe error:', err);
+    }
+  };
   
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -278,9 +359,32 @@ const Footer: React.FC = () => {
               <SectionTitle>Support</SectionTitle>
               <FooterLink href="/help">Help Center</FooterLink>
               <FooterLink href="/faq">FAQ</FooterLink>
-              <FooterLink href="/contact">Contact Us</FooterLink>
+              <FooterRouterLink to="/contact">Contact Us</FooterRouterLink>
               <FooterLink href="/privacy">Privacy Policy</FooterLink>
               <FooterLink href="/terms">Terms of Service</FooterLink>
+
+              <NewsletterBox>
+                <NewsletterTitle>📬 Subscribe to Newsletter</NewsletterTitle>
+                {subscribed ? (
+                  <SuccessMsg>✅ You're subscribed! Thanks for joining.</SuccessMsg>
+                ) : (
+                  <>
+                    <NewsletterInput
+                      type="email"
+                      placeholder="Enter your email"
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                    />
+                    <SubscribeBtn
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={handleSubscribe}
+                    >
+                      Subscribe
+                    </SubscribeBtn>
+                  </>
+                )}
+              </NewsletterBox>
             </FooterSection>
 
             <FooterSection variants={itemVariants}>
